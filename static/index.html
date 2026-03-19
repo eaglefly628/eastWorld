@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EastWorld — A Western Life</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background: #1a1a2e;
+    color: #e0d5c1;
+    font-family: 'Georgia', serif;
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* ── Login Screen ─────────────────────────────────── */
+#login-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: linear-gradient(180deg, #2c1810 0%, #1a1a2e 100%);
+}
+
+#login-screen h1 {
+    font-size: 4rem;
+    color: #d4a574;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.3rem;
+}
+
+#login-screen p {
+    color: #a89070;
+    margin-bottom: 2rem;
+    font-style: italic;
+}
+
+#login-screen input {
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    background: #2c1810;
+    border: 2px solid #6b4226;
+    color: #e0d5c1;
+    border-radius: 4px;
+    width: 300px;
+    text-align: center;
+    margin-bottom: 1rem;
+    font-family: inherit;
+}
+
+#login-screen input::placeholder { color: #6b4226; }
+#login-screen input:focus { outline: none; border-color: #d4a574; }
+
+#login-screen button {
+    padding: 12px 48px;
+    font-size: 1.1rem;
+    background: #6b4226;
+    color: #e0d5c1;
+    border: 2px solid #d4a574;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+#login-screen button:hover {
+    background: #8b5e3c;
+    transform: scale(1.05);
+}
+
+/* ── Game Screen ──────────────────────────────────── */
+#game-screen { display: none; height: 100vh; position: relative; }
+
+canvas {
+    display: block;
+    image-rendering: pixelated;
+}
+
+/* ── HUD ──────────────────────────────────────────── */
+#hud {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(44, 24, 16, 0.85);
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #6b4226;
+    font-size: 0.85rem;
+}
+
+#hud .player-count { color: #d4a574; }
+
+#hint {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(44, 24, 16, 0.9);
+    padding: 8px 20px;
+    border-radius: 20px;
+    border: 1px solid #6b4226;
+    font-size: 0.9rem;
+    color: #d4a574;
+    display: none;
+    white-space: nowrap;
+}
+
+/* ── Chat / Dialogue Panel ────────────────────────── */
+#dialogue-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(20, 12, 8, 0.95);
+    border-top: 2px solid #6b4226;
+    max-height: 45vh;
+    display: none;
+    flex-direction: column;
+}
+
+#dialogue-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: #2c1810;
+    border-bottom: 1px solid #6b4226;
+}
+
+#dialogue-header .npc-name {
+    color: #d4a574;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+#dialogue-header .close-btn {
+    background: none;
+    border: none;
+    color: #a89070;
+    font-size: 1.2rem;
+    cursor: pointer;
+}
+#dialogue-header .close-btn:hover { color: #e74c3c; }
+
+#dialogue-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 16px;
+    min-height: 120px;
+    max-height: 30vh;
+}
+
+#dialogue-messages .msg {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+#dialogue-messages .msg .sender {
+    font-weight: bold;
+    margin-right: 6px;
+}
+
+#dialogue-messages .msg.npc .sender { color: #d4a574; }
+#dialogue-messages .msg.player .sender { color: #3498db; }
+#dialogue-messages .msg.system { color: #888; font-style: italic; font-size: 0.85rem; }
+
+#dialogue-input-area {
+    display: flex;
+    padding: 8px 12px;
+    gap: 8px;
+    border-top: 1px solid #3a2418;
+}
+
+#dialogue-input {
+    flex: 1;
+    padding: 10px 14px;
+    background: #2c1810;
+    border: 1px solid #6b4226;
+    color: #e0d5c1;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+#dialogue-input:focus { outline: none; border-color: #d4a574; }
+
+#dialogue-send {
+    padding: 10px 20px;
+    background: #6b4226;
+    color: #e0d5c1;
+    border: 1px solid #d4a574;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+}
+#dialogue-send:hover { background: #8b5e3c; }
+
+/* ── Activity Feed ────────────────────────────────── */
+#activity-feed {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 280px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#activity-feed .activity {
+    background: rgba(44, 24, 16, 0.8);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: #a89070;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #1a1a2e; }
+::-webkit-scrollbar-thumb { background: #6b4226; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="login-screen">
+    <h1>EASTWORLD</h1>
+    <p>A place where every soul has a story</p>
+    <input type="text" id="player-name" placeholder="Enter your name, stranger..." maxlength="20" autofocus>
+    <button id="join-btn">Enter the Town</button>
+</div>
+
+<!-- Game Screen -->
+<div id="game-screen">
+    <canvas id="game-canvas"></canvas>
+
+    <div id="hud">
+        <span id="player-info"></span> &bull;
+        <span class="player-count"><span id="online-count">1</span> souls in town</span>
+        &bull; <span style="color:#888">WASD/Arrows to move, E to talk</span>
+    </div>
+
+    <div id="hint"></div>
+
+    <div id="activity-feed"></div>
+
+    <div id="dialogue-panel">
+        <div id="dialogue-header">
+            <span class="npc-name" id="dialogue-npc-name">NPC</span>
+            <button class="close-btn" id="dialogue-close">&times;</button>
+        </div>
+        <div id="dialogue-messages"></div>
+        <div id="dialogue-input-area">
+            <input type="text" id="dialogue-input" placeholder="Say something..." maxlength="500">
+            <button id="dialogue-send">Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// EastWorld Client
+// ════════════════════════════════════════════════════════════════════
+
+const TILE = 24;
+const SPRITE_COLORS = {
+    sheriff:  '#e74c3c',
+    saloon:   '#e84393',
+    doctor:   '#3498db',
+    outlaw:   '#2c3e50',
+    preacher: '#f1c40f',
+    banker:   '#27ae60',
+    stable:   '#e67e22',
+    hotel:    '#9b59b6',
+};
+const TILE_COLORS = {
+    0: '#d4a574',  // sand
+    1: '#8b7355',  // road
+    2: '#6b4226',  // building
+    3: '#3498db',  // water
+    4: '#27ae60',  // cactus
+    5: '#7f8c8d',  // rock
+};
+
+let ws = null;
+let myId = null;
+let myName = '';
+let worldData = null;
+let players = {};
+let npcs = {};
+let myPos = { x: 20, y: 15 };
+let nearNpc = null;
+let dialogueOpen = false;
+let currentNpcId = null;
+
+// ── DOM refs ─────────────────────────────────────────
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+const loginScreen = document.getElementById('login-screen');
+const gameScreen = document.getElementById('game-screen');
+const nameInput = document.getElementById('player-name');
+const joinBtn = document.getElementById('join-btn');
+const hintEl = document.getElementById('hint');
+const dialoguePanel = document.getElementById('dialogue-panel');
+const dialogueNpcName = document.getElementById('dialogue-npc-name');
+const dialogueMessages = document.getElementById('dialogue-messages');
+const dialogueInput = document.getElementById('dialogue-input');
+const dialogueSend = document.getElementById('dialogue-send');
+const dialogueClose = document.getElementById('dialogue-close');
+const playerInfo = document.getElementById('player-info');
+const onlineCount = document.getElementById('online-count');
+const activityFeed = document.getElementById('activity-feed');
+
+// ── Login ────────────────────────────────────────────
+joinBtn.onclick = () => joinGame();
+nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') joinGame(); });
+
+function joinGame() {
+    myName = nameInput.value.trim() || `Stranger-${Math.random().toString(36).slice(2,6)}`;
+    connect();
+}
+
+// ── WebSocket ────────────────────────────────────────
+function connect() {
+    const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+    ws = new WebSocket(`${proto}://${location.host}/ws`);
+
+    ws.onopen = () => {
+        ws.send(JSON.stringify({ type: 'join', name: myName }));
+    };
+
+    ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        handleServerMessage(msg);
+    };
+
+    ws.onclose = () => {
+        addActivity('Connection lost. Refresh to rejoin.');
+    };
+}
+
+function handleServerMessage(msg) {
+    switch (msg.type) {
+        case 'init':
+            myId = msg.player_id;
+            worldData = msg.world;
+            // Index NPCs
+            msg.world.npcs.forEach(n => { npcs[n.id] = n; });
+            // Index players
+            msg.world.players.forEach(p => {
+                if (p.id !== myId) players[p.id] = p;
+            });
+            // Find my position
+            const me = msg.world.players.find(p => p.id === myId);
+            if (me) myPos = me.position;
+            // Show game
+            loginScreen.style.display = 'none';
+            gameScreen.style.display = 'block';
+            playerInfo.textContent = myName;
+            resizeCanvas();
+            updateOnlineCount();
+            requestAnimationFrame(gameLoop);
+            break;
+
+        case 'player_joined':
+            players[msg.player.id] = msg.player;
+            addActivity(`${msg.player.name} rode into town`);
+            updateOnlineCount();
+            break;
+
+        case 'player_left':
+            const left = players[msg.player_id];
+            if (left) addActivity(`${left.name} left town`);
+            delete players[msg.player_id];
+            updateOnlineCount();
+            break;
+
+        case 'player_moved':
+            if (msg.player_id !== myId && players[msg.player_id]) {
+                players[msg.player_id].position = msg.position;
+            }
+            break;
+
+        case 'near_npc':
+            nearNpc = { id: msg.npc_id, name: msg.npc_name, greeting: msg.greeting };
+            hintEl.textContent = `Press E to talk to ${msg.npc_name}`;
+            hintEl.style.display = 'block';
+            break;
+
+        case 'npc_response':
+            appendDialogue(msg.npc_name, msg.message, 'npc');
+            break;
+
+        case 'conversation':
+            addActivity(`${msg.player_name} is talking to ${msg.npc_name}`);
+            break;
+
+        case 'pong':
+            break;
+    }
+}
+
+// ── Input ────────────────────────────────────────────
+const keys = {};
+document.addEventListener('keydown', e => {
+    keys[e.key] = true;
+
+    if (e.key === 'e' || e.key === 'E') {
+        if (nearNpc && !dialogueOpen) {
+            openDialogue(nearNpc.id, nearNpc.name, nearNpc.greeting);
+        }
+    }
+
+    if (e.key === 'Escape' && dialogueOpen) {
+        closeDialogue();
+    }
+});
+document.addEventListener('keyup', e => { keys[e.key] = false; });
+
+// Movement
+let moveTimer = 0;
+const MOVE_INTERVAL = 120; // ms between moves
+
+function handleMovement(dt) {
+    if (dialogueOpen) return;
+    moveTimer += dt;
+    if (moveTimer < MOVE_INTERVAL) return;
+    moveTimer = 0;
+
+    let dx = 0, dy = 0;
+    if (keys['ArrowUp'] || keys['w'] || keys['W']) dy = -1;
+    if (keys['ArrowDown'] || keys['s'] || keys['S']) dy = 1;
+    if (keys['ArrowLeft'] || keys['a'] || keys['A']) dx = -1;
+    if (keys['ArrowRight'] || keys['d'] || keys['D']) dx = 1;
+
+    if (dx === 0 && dy === 0) return;
+
+    const newX = Math.max(0, Math.min(39, myPos.x + dx));
+    const newY = Math.max(0, Math.min(29, myPos.y + dy));
+
+    // Don't walk into buildings or water
+    if (worldData) {
+        const tile = worldData.map[newY][newX];
+        if (tile === 2 || tile === 3) return;
+    }
+
+    myPos = { x: newX, y: newY };
+
+    // Clear hint if moved away
+    hintEl.style.display = 'none';
+    nearNpc = null;
+
+    ws.send(JSON.stringify({ type: 'move', dx, dy }));
+}
+
+// ── Dialogue ─────────────────────────────────────────
+function openDialogue(npcId, npcName, greeting) {
+    dialogueOpen = true;
+    currentNpcId = npcId;
+    dialogueNpcName.textContent = npcName;
+    dialogueMessages.innerHTML = '';
+    appendDialogue(npcName, greeting, 'npc');
+    dialoguePanel.style.display = 'flex';
+    dialogueInput.focus();
+    hintEl.style.display = 'none';
+}
+
+function closeDialogue() {
+    dialogueOpen = false;
+    currentNpcId = null;
+    dialoguePanel.style.display = 'none';
+}
+
+function sendMessage() {
+    const text = dialogueInput.value.trim();
+    if (!text || !currentNpcId) return;
+
+    appendDialogue(myName, text, 'player');
+    ws.send(JSON.stringify({
+        type: 'talk',
+        npc_id: currentNpcId,
+        message: text,
+    }));
+    dialogueInput.value = '';
+}
+
+dialogueSend.onclick = sendMessage;
+dialogueInput.addEventListener('keydown', e => {
+    e.stopPropagation(); // Don't trigger movement
+    if (e.key === 'Enter') sendMessage();
+    if (e.key === 'Escape') closeDialogue();
+});
+dialogueClose.onclick = closeDialogue;
+
+function appendDialogue(sender, text, type) {
+    const div = document.createElement('div');
+    div.className = `msg ${type}`;
+    div.innerHTML = `<span class="sender">${sender}:</span> ${escapeHtml(text)}`;
+    dialogueMessages.appendChild(div);
+    dialogueMessages.scrollTop = dialogueMessages.scrollHeight;
+}
+
+// ── Activity Feed ────────────────────────────────────
+function addActivity(text) {
+    const div = document.createElement('div');
+    div.className = 'activity';
+    div.textContent = text;
+    activityFeed.appendChild(div);
+    if (activityFeed.children.length > 20) {
+        activityFeed.removeChild(activityFeed.firstChild);
+    }
+}
+
+function updateOnlineCount() {
+    onlineCount.textContent = Object.keys(players).length + 1;
+}
+
+// ── Rendering ────────────────────────────────────────
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+
+let lastTime = 0;
+
+function gameLoop(timestamp) {
+    const dt = timestamp - lastTime;
+    lastTime = timestamp;
+
+    handleMovement(dt);
+    render();
+    requestAnimationFrame(gameLoop);
+}
+
+function render() {
+    if (!worldData) return;
+    const W = canvas.width, H = canvas.height;
+
+    // Camera: center on player
+    const camX = myPos.x * TILE - W / 2 + TILE / 2;
+    const camY = myPos.y * TILE - H / 2 + TILE / 2;
+
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0, 0, W, H);
+
+    // Draw map
+    const startCol = Math.max(0, Math.floor(camX / TILE));
+    const endCol = Math.min(worldData.map_width, Math.ceil((camX + W) / TILE) + 1);
+    const startRow = Math.max(0, Math.floor(camY / TILE));
+    const endRow = Math.min(worldData.map_height, Math.ceil((camY + H) / TILE) + 1);
+
+    for (let y = startRow; y < endRow; y++) {
+        for (let x = startCol; x < endCol; x++) {
+            const tile = worldData.map[y][x];
+            const sx = x * TILE - camX;
+            const sy = y * TILE - camY;
+
+            ctx.fillStyle = TILE_COLORS[tile] || '#333';
+            ctx.fillRect(sx, sy, TILE, TILE);
+
+            // Tile borders for texture
+            ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+            ctx.strokeRect(sx, sy, TILE, TILE);
+
+            // Decorations
+            if (tile === 4) { // Cactus
+                ctx.fillStyle = '#1e8449';
+                ctx.fillRect(sx + 9, sy + 4, 6, 16);
+                ctx.fillRect(sx + 4, sy + 8, 6, 4);
+                ctx.fillRect(sx + 14, sy + 6, 6, 4);
+            } else if (tile === 5) { // Rock
+                ctx.fillStyle = '#5d6d7e';
+                ctx.beginPath();
+                ctx.arc(sx + TILE/2, sy + TILE/2 + 2, 8, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (tile === 2) { // Building texture
+                ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                ctx.fillRect(sx + 2, sy + 2, TILE - 4, TILE - 4);
+            }
+        }
+    }
+
+    // Draw NPCs
+    for (const npc of Object.values(npcs)) {
+        const sx = npc.position.x * TILE - camX;
+        const sy = npc.position.y * TILE - camY;
+        const color = SPRITE_COLORS[npc.sprite] || '#fff';
+
+        // Body
+        ctx.fillStyle = color;
+        ctx.fillRect(sx + 4, sy + 6, 16, 14);
+
+        // Head
+        ctx.fillStyle = '#fad390';
+        ctx.beginPath();
+        ctx.arc(sx + TILE/2, sy + 6, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Hat
+        ctx.fillStyle = '#2c1810';
+        ctx.fillRect(sx + 3, sy - 1, 18, 4);
+        ctx.fillRect(sx + 6, sy - 5, 12, 5);
+
+        // Name label
+        ctx.fillStyle = color;
+        ctx.font = 'bold 10px Georgia';
+        ctx.textAlign = 'center';
+        ctx.fillText(npc.name, sx + TILE/2, sy - 6);
+    }
+
+    // Draw other players
+    for (const p of Object.values(players)) {
+        const sx = p.position.x * TILE - camX;
+        const sy = p.position.y * TILE - camY;
+
+        // Body
+        ctx.fillStyle = p.color;
+        ctx.fillRect(sx + 6, sy + 8, 12, 12);
+
+        // Head
+        ctx.fillStyle = '#fad390';
+        ctx.beginPath();
+        ctx.arc(sx + TILE/2, sy + 7, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Name
+        ctx.fillStyle = p.color;
+        ctx.font = '9px Georgia';
+        ctx.textAlign = 'center';
+        ctx.fillText(p.name, sx + TILE/2, sy - 2);
+    }
+
+    // Draw self
+    {
+        const sx = myPos.x * TILE - camX;
+        const sy = myPos.y * TILE - camY;
+
+        // Glow
+        ctx.shadowColor = '#f39c12';
+        ctx.shadowBlur = 10;
+
+        // Body
+        ctx.fillStyle = '#f39c12';
+        ctx.fillRect(sx + 6, sy + 8, 12, 12);
+
+        // Head
+        ctx.fillStyle = '#fad390';
+        ctx.beginPath();
+        ctx.arc(sx + TILE/2, sy + 7, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.shadowBlur = 0;
+
+        // Name
+        ctx.fillStyle = '#f39c12';
+        ctx.font = 'bold 10px Georgia';
+        ctx.textAlign = 'center';
+        ctx.fillText(myName, sx + TILE/2, sy - 2);
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Keepalive
+setInterval(() => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'ping' }));
+    }
+}, 30000);
+</script>
+</body>
+</html>
