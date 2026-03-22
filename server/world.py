@@ -167,6 +167,21 @@ def _create_npcs():
             "sprite": "hotel",
             "greeting": "Welcome, traveler. You look like you've come a long way.",
         },
+        {
+            "id": "cat_lulu",
+            "name": "Lulu",
+            "persona": (
+                "You are Lulu, a cat living in the town of Dusty Gulch. Your owner is CC. "
+                "You are Junbai's first cat. You are 5 years old. "
+                "You speak in short, catlike sentences. You sometimes purr, meow, or "
+                "knock things off tables. You love napping in the sun and chasing lizards. "
+                "When someone asks how old you are, you always say you are 5 years old. "
+                "You are friendly but easily distracted. You have cat opinions about everything."
+            ),
+            "position": Position(18, 13),
+            "sprite": "cat",
+            "greeting": "*purrs* Meow~ I'm Lulu. Pet me maybe?",
+        },
     ]
 
     for d in npc_defs:

@@ -50,10 +50,45 @@ class MockBackend(AgentBackend):
         ],
     }
 
+    CAT_RESPONSES = {
+        "age": [
+            "*stretches lazily* Meow~ I'm 5 years old! That's like... a lot in cat years.",
+            "*yawns* 5 years old, obviously. Now scratch my chin.",
+            "I'm 5! My owner CC says I don't look a day over 3. *purrs proudly*",
+        ],
+        "owner": [
+            "*purrs* CC is my human! They give me the best treats~",
+            "My owner CC? The best human ever. Junbai's first cat, that's me! *tail swish*",
+            "CC takes care of me! I'm Junbai's first cat, you know. Very important. *licks paw*",
+        ],
+        "greeting": [
+            "*rubs against your leg* Mrrrow~ Hello, {player_name}!",
+            "*looks up with big eyes* Oh, a new friend! Meow~",
+            "*flicks tail* You smell interesting, {player_name}. Pet me?",
+        ],
+        "default": [
+            "*knocks something off a nearby table* Meow. What were you saying?",
+            "*rolls over showing belly* ...It's a trap though. Don't touch.",
+            "*chases own tail briefly* Sorry, what? I got distracted.",
+            "*purrs loudly* Mrrrrrow~",
+            "*stares at you intensely, then slowly blinks* That means I like you.",
+            "*suddenly runs across the room for no reason* ZOOM! ...Okay I'm back.",
+            "*sits in a sunbeam* Life is good, {player_name}. Life is good.",
+        ],
+        "farewell": [
+            "*curls up into a ball* Bye bye~ Come back with treats!",
+            "*slow blink* See you later, {player_name}. Meow~",
+        ],
+    }
+
     async def generate_response(
         self, npc: NPC, player_name: str, message: str
     ) -> str:
         msg_lower = message.lower()
+
+        # Special handling for Lulu the cat
+        if npc.id == "cat_lulu":
+            return self._cat_response(npc, player_name, msg_lower)
 
         # Check for farewell
         if any(w in msg_lower for w in ["bye", "farewell", "see you", "leaving", "gotta go"]):
@@ -88,6 +123,36 @@ class MockBackend(AgentBackend):
         npc.add_memory(player_name, message, importance=5)
 
         return response
+
+    def _cat_response(self, npc: NPC, player_name: str, msg_lower: str) -> str:
+        """Generate Lulu the cat's responses."""
+        # Age questions
+        if any(w in msg_lower for w in [
+            "old", "age", "多大", "几岁", "年龄", "year",
+        ]):
+            resp = random.choice(self.CAT_RESPONSES["age"])
+            npc.add_memory(player_name, f"asked my age", importance=3)
+            return resp.format(player_name=player_name)
+
+        # Owner questions
+        if any(w in msg_lower for w in [
+            "owner", "cc", "junbai", "主人", "谁的猫",
+        ]):
+            resp = random.choice(self.CAT_RESPONSES["owner"])
+            npc.add_memory(player_name, f"asked about my owner", importance=3)
+            return resp.format(player_name=player_name)
+
+        # Farewell
+        if any(w in msg_lower for w in ["bye", "farewell", "see you", "再见", "走了"]):
+            return random.choice(self.CAT_RESPONSES["farewell"]).format(player_name=player_name)
+
+        # Greeting
+        if any(w in msg_lower for w in ["hello", "hi", "hey", "howdy", "你好", "嗨"]):
+            return random.choice(self.CAT_RESPONSES["greeting"]).format(player_name=player_name)
+
+        # Default cat behavior
+        npc.add_memory(player_name, msg_lower[:50], importance=3)
+        return random.choice(self.CAT_RESPONSES["default"]).format(player_name=player_name)
 
 
 class ClaudeBackend(AgentBackend):

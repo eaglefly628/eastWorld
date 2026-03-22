@@ -281,6 +281,7 @@ const SPRITE_COLORS = {
     banker:   '#27ae60',
     stable:   '#e67e22',
     hotel:    '#9b59b6',
+    cat:      '#f4a460',
 };
 const TILE_COLORS = {
     0: '#d4a574',  // sand
@@ -596,26 +597,95 @@ function render() {
         const sy = npc.position.y * TILE - camY;
         const color = SPRITE_COLORS[npc.sprite] || '#fff';
 
-        // Body
-        ctx.fillStyle = color;
-        ctx.fillRect(sx + 4, sy + 6, 16, 14);
+        if (npc.sprite === 'cat') {
+            // Draw cat sprite for Lulu
+            // Body (oval)
+            ctx.fillStyle = '#f4a460';
+            ctx.beginPath();
+            ctx.ellipse(sx + TILE/2, sy + 14, 8, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
 
-        // Head
-        ctx.fillStyle = '#fad390';
-        ctx.beginPath();
-        ctx.arc(sx + TILE/2, sy + 6, 6, 0, Math.PI * 2);
-        ctx.fill();
+            // Head (circle)
+            ctx.beginPath();
+            ctx.arc(sx + TILE/2, sy + 7, 5, 0, Math.PI * 2);
+            ctx.fill();
 
-        // Hat
-        ctx.fillStyle = '#2c1810';
-        ctx.fillRect(sx + 3, sy - 1, 18, 4);
-        ctx.fillRect(sx + 6, sy - 5, 12, 5);
+            // Ears (triangles)
+            ctx.beginPath();
+            ctx.moveTo(sx + 7, sy + 4);
+            ctx.lineTo(sx + 9, sy - 1);
+            ctx.lineTo(sx + 12, sy + 4);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(sx + 12, sy + 4);
+            ctx.lineTo(sx + 15, sy - 1);
+            ctx.lineTo(sx + 17, sy + 4);
+            ctx.fill();
 
-        // Name label
-        ctx.fillStyle = color;
-        ctx.font = 'bold 10px Georgia';
-        ctx.textAlign = 'center';
-        ctx.fillText(npc.name, sx + TILE/2, sy - 6);
+            // Inner ears
+            ctx.fillStyle = '#ffb6c1';
+            ctx.beginPath();
+            ctx.moveTo(sx + 8, sy + 3);
+            ctx.lineTo(sx + 9.5, sy + 0);
+            ctx.lineTo(sx + 11, sy + 3);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(sx + 13, sy + 3);
+            ctx.lineTo(sx + 14.5, sy + 0);
+            ctx.lineTo(sx + 16, sy + 3);
+            ctx.fill();
+
+            // Eyes
+            ctx.fillStyle = '#2ecc71';
+            ctx.beginPath();
+            ctx.arc(sx + 10, sy + 7, 1.5, 0, Math.PI * 2);
+            ctx.arc(sx + 14, sy + 7, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Nose (tiny pink triangle)
+            ctx.fillStyle = '#ff69b4';
+            ctx.beginPath();
+            ctx.moveTo(sx + 12, sy + 8.5);
+            ctx.lineTo(sx + 11, sy + 9.5);
+            ctx.lineTo(sx + 13, sy + 9.5);
+            ctx.fill();
+
+            // Tail (curved line)
+            ctx.strokeStyle = '#d2864a';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(sx + 19, sy + 14);
+            ctx.quadraticCurveTo(sx + 23, sy + 8, sx + 20, sy + 4);
+            ctx.stroke();
+            ctx.lineWidth = 1;
+
+            // Name label
+            ctx.fillStyle = '#f4a460';
+            ctx.font = 'bold 10px Georgia';
+            ctx.textAlign = 'center';
+            ctx.fillText(npc.name, sx + TILE/2, sy - 4);
+        } else {
+            // Body
+            ctx.fillStyle = color;
+            ctx.fillRect(sx + 4, sy + 6, 16, 14);
+
+            // Head
+            ctx.fillStyle = '#fad390';
+            ctx.beginPath();
+            ctx.arc(sx + TILE/2, sy + 6, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Hat
+            ctx.fillStyle = '#2c1810';
+            ctx.fillRect(sx + 3, sy - 1, 18, 4);
+            ctx.fillRect(sx + 6, sy - 5, 12, 5);
+
+            // Name label
+            ctx.fillStyle = color;
+            ctx.font = 'bold 10px Georgia';
+            ctx.textAlign = 'center';
+            ctx.fillText(npc.name, sx + TILE/2, sy - 6);
+        }
     }
 
     // Draw other players
