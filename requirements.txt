@@ -1,5 +1,6 @@
-fastapi==0.115.0
-uvicorn[standard]==0.30.6
-websockets==12.0
-pydantic==2.9.0
-anthropic==0.34.0
+# Core dependencies (vendored in vendor/, no install needed)
+# Just run: python run.py
+#
+# To use Claude API for NPC intelligence:
+#   pip install anthropic
+#   EASTWORLD_BACKEND=claude ANTHROPIC_API_KEY=sk-... python run.py

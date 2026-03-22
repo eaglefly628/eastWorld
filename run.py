@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """Launch EastWorld server."""
 
+import os
+import sys
+
+# Load vendored dependencies (no pip install needed)
+_vendor = os.path.join(os.path.dirname(os.path.abspath(__file__)), "vendor")
+if os.path.isdir(_vendor):
+    sys.path.insert(0, _vendor)
+
 import uvicorn
 
 if __name__ == "__main__":

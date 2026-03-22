@@ -2,6 +2,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
+!vendor/**/*.so
+vendor/**/__pycache__/
+vendor/**/*.dist-info/
 .Python
 env/
 venv/
