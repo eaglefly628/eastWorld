@@ -1,6 +1,10 @@
-# Core dependencies (vendored in vendor/, no install needed)
+# Auto-installed by run.py on first launch. No manual install needed.
 # Just run: python run.py
-#
-# To use Claude API for NPC intelligence:
-#   pip install anthropic
-#   EASTWORLD_BACKEND=claude ANTHROPIC_API_KEY=sk-... python run.py
+fastapi
+uvicorn[standard]
+websockets
+pydantic
+
+# Optional: for AI-powered NPC responses (instead of mock templates)
+# pip install anthropic
+# EASTWORLD_BACKEND=claude ANTHROPIC_API_KEY=sk-... python run.py
