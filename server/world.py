@@ -178,7 +178,7 @@ def _create_npcs():
                 "When someone asks how old you are, you always say you are 5 years old. "
                 "You are friendly but easily distracted. You have cat opinions about everything."
             ),
-            "position": Position(18, 13),
+            "position": Position(19, 13),
             "sprite": "cat",
             "greeting": "*purrs* Meow~ I'm Lulu. Pet me maybe?",
         },

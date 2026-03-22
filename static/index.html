@@ -598,72 +598,111 @@ function render() {
         const color = SPRITE_COLORS[npc.sprite] || '#fff';
 
         if (npc.sprite === 'cat') {
-            // Draw cat sprite for Lulu
+            // Draw cat sprite for Lulu - larger and more visible
+            const cx = sx + TILE / 2;
+
             // Body (oval)
             ctx.fillStyle = '#f4a460';
             ctx.beginPath();
-            ctx.ellipse(sx + TILE/2, sy + 14, 8, 6, 0, 0, Math.PI * 2);
+            ctx.ellipse(cx, sy + 16, 10, 7, 0, 0, Math.PI * 2);
             ctx.fill();
+            // Darker outline
+            ctx.strokeStyle = '#c87830';
+            ctx.lineWidth = 1;
+            ctx.stroke();
 
             // Head (circle)
+            ctx.fillStyle = '#f4a460';
             ctx.beginPath();
-            ctx.arc(sx + TILE/2, sy + 7, 5, 0, Math.PI * 2);
+            ctx.arc(cx, sy + 7, 7, 0, Math.PI * 2);
             ctx.fill();
+            ctx.strokeStyle = '#c87830';
+            ctx.stroke();
 
             // Ears (triangles)
+            ctx.fillStyle = '#f4a460';
             ctx.beginPath();
-            ctx.moveTo(sx + 7, sy + 4);
-            ctx.lineTo(sx + 9, sy - 1);
-            ctx.lineTo(sx + 12, sy + 4);
+            ctx.moveTo(cx - 7, sy + 3);
+            ctx.lineTo(cx - 4, sy - 4);
+            ctx.lineTo(cx - 1, sy + 3);
+            ctx.closePath();
             ctx.fill();
+            ctx.stroke();
             ctx.beginPath();
-            ctx.moveTo(sx + 12, sy + 4);
-            ctx.lineTo(sx + 15, sy - 1);
-            ctx.lineTo(sx + 17, sy + 4);
+            ctx.moveTo(cx + 1, sy + 3);
+            ctx.lineTo(cx + 4, sy - 4);
+            ctx.lineTo(cx + 7, sy + 3);
+            ctx.closePath();
             ctx.fill();
+            ctx.stroke();
 
-            // Inner ears
+            // Inner ears (pink)
             ctx.fillStyle = '#ffb6c1';
             ctx.beginPath();
-            ctx.moveTo(sx + 8, sy + 3);
-            ctx.lineTo(sx + 9.5, sy + 0);
-            ctx.lineTo(sx + 11, sy + 3);
+            ctx.moveTo(cx - 6, sy + 2);
+            ctx.lineTo(cx - 4, sy - 2);
+            ctx.lineTo(cx - 2, sy + 2);
+            ctx.closePath();
             ctx.fill();
             ctx.beginPath();
-            ctx.moveTo(sx + 13, sy + 3);
-            ctx.lineTo(sx + 14.5, sy + 0);
-            ctx.lineTo(sx + 16, sy + 3);
+            ctx.moveTo(cx + 2, sy + 2);
+            ctx.lineTo(cx + 4, sy - 2);
+            ctx.lineTo(cx + 6, sy + 2);
+            ctx.closePath();
             ctx.fill();
 
-            // Eyes
+            // Eyes (bright green, bigger)
             ctx.fillStyle = '#2ecc71';
             ctx.beginPath();
-            ctx.arc(sx + 10, sy + 7, 1.5, 0, Math.PI * 2);
-            ctx.arc(sx + 14, sy + 7, 1.5, 0, Math.PI * 2);
+            ctx.arc(cx - 3, sy + 6, 2, 0, Math.PI * 2);
+            ctx.arc(cx + 3, sy + 6, 2, 0, Math.PI * 2);
+            ctx.fill();
+            // Pupils
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(cx - 3, sy + 6, 0.8, 0, Math.PI * 2);
+            ctx.arc(cx + 3, sy + 6, 0.8, 0, Math.PI * 2);
             ctx.fill();
 
-            // Nose (tiny pink triangle)
+            // Nose (pink)
             ctx.fillStyle = '#ff69b4';
             ctx.beginPath();
-            ctx.moveTo(sx + 12, sy + 8.5);
-            ctx.lineTo(sx + 11, sy + 9.5);
-            ctx.lineTo(sx + 13, sy + 9.5);
+            ctx.moveTo(cx, sy + 8);
+            ctx.lineTo(cx - 1.5, sy + 9.5);
+            ctx.lineTo(cx + 1.5, sy + 9.5);
+            ctx.closePath();
             ctx.fill();
 
-            // Tail (curved line)
-            ctx.strokeStyle = '#d2864a';
-            ctx.lineWidth = 2;
+            // Whiskers
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 0.5;
             ctx.beginPath();
-            ctx.moveTo(sx + 19, sy + 14);
-            ctx.quadraticCurveTo(sx + 23, sy + 8, sx + 20, sy + 4);
+            ctx.moveTo(cx - 3, sy + 9); ctx.lineTo(cx - 10, sy + 7);
+            ctx.moveTo(cx - 3, sy + 9); ctx.lineTo(cx - 10, sy + 10);
+            ctx.moveTo(cx + 3, sy + 9); ctx.lineTo(cx + 10, sy + 7);
+            ctx.moveTo(cx + 3, sy + 9); ctx.lineTo(cx + 10, sy + 10);
+            ctx.stroke();
+
+            // Tail (curved, thicker)
+            ctx.strokeStyle = '#d2864a';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(sx + 21, sy + 16);
+            ctx.quadraticCurveTo(sx + 28, sy + 8, sx + 24, sy + 2);
             ctx.stroke();
             ctx.lineWidth = 1;
+            ctx.lineCap = 'butt';
 
-            // Name label
-            ctx.fillStyle = '#f4a460';
-            ctx.font = 'bold 10px Georgia';
+            // Name label (with background for visibility)
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            const nameW = ctx.measureText('🐱 ' + npc.name).width;
+            ctx.font = 'bold 11px Georgia';
+            const textW = ctx.measureText('🐱 ' + npc.name).width;
+            ctx.fillRect(cx - textW/2 - 2, sy - 16, textW + 4, 13);
+            ctx.fillStyle = '#ffd700';
             ctx.textAlign = 'center';
-            ctx.fillText(npc.name, sx + TILE/2, sy - 4);
+            ctx.fillText('🐱 ' + npc.name, cx, sy - 6);
         } else {
             // Body
             ctx.fillStyle = color;
